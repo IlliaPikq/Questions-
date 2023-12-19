@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-200 p-[5vmax]"> 
+    <p class="text-center text-3xl m-[2vmax]">Total number of questions: <span class="questionsQuantity text-cyan-200">0</span></p>
+    <div class="questionsSection || mt-24">
+        <h2 class="text-4xl">Questions:</h2>
+        <div class="questionsWrapper || flex gap-4 px-4 py-2 bg-slate-950 my-5 rounded">
+        </div>
+    </div>
+        <template class="templateID">
+            <button class="questionBtn || p-4 border border-slate-400">
+                <h2 class="questionID"></h2>
+            </button>
+    </template>
+    <template class="templateQuestion">
+        <div class="question">
+            <h2>Question Details</h2>
+            <div class="question-details">
+                <p><strong>ID:</strong> </p>
+                <p><strong>Question:</strong> </p>
+                <p><strong>Option A:</strong> </p>
+                <p><strong>Option B:</strong> </p>
+                <p><strong>Option C:</strong> </p>
+                <p><strong>Option D:</strong> </p>
+                <p><strong>Correct Answer: </strong> </p>
+                <p><strong>Category:</strong> </p>
+                <p><strong>Year:</strong> </p>
+            </div>
+            <button class="border py-2 px-6 hover:bg-slate-300 hover:text-slate-900 focus:bg-slate-300 focus:text-slate-900 mt-10"><-- Back</button>
+        </div>
+    
+    </template>
+    <script defer>
+        async function fetchData(url = 'http://localhost:3000') {
+            const data = await fetch(url).then(async res => res.json()).catch(err => {throw new Error('Failed to fetch data properly. ' + err)})
+            return data
+        }
+        async function applyData() {
+            const questions = await fetchData()
+            document.querySelector('.questionsQuantity').textContent = questions.length
+            const temp = document.querySelector('template.templateID')
+            for(const question of questions) {
+                let clone = temp.content.cloneNode(true)
+                const titleID = clone.querySelector('.questionID')
+                const questionBtn = clone.querySelector('.questionBtn')
+                questionBtn.addEventListener('click', handleClick)
+                titleID.textContent = question.id
+                document.querySelector('.questionsWrapper').append(clone)
+            }
+        }
+        applyData()
+        async function handleClick(e) {
+            const question = await fetchData('http://localhost:3000/' + e.target.textContent)
+            const temp = document.querySelector('template.templateQuestion')
+            let clone = temp.content.cloneNode(true)
+            let i = 0
+            for(attribute in question) {
+                console.log(attribute);
+                const value = question[attribute]
+
+                // if value in a record is typeof number than keep it as it is
+                // if not - change first letter of value to uppercase   
+                let formatedValue = (typeof value === 'number') ? value 
+                : value.charAt(0).toUpperCase() + value.slice(1) 
+
+                const p = clone.querySelectorAll('p')[i]
+                p.innerHTML += formatedValue
+                
+                i++
+            }
+            document.body.innerHTML = ''
+            document.body.append(clone)
+        }
+    </script>
+</body>
+</html>
